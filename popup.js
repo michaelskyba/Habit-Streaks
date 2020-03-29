@@ -1,3 +1,5 @@
+//This shouldn't be here if we switch back to master, right?
+
 { //Keeps track of which tab is open
 chrome.storage.sync.get('last_active_tab', function(habit_streaks) //Opens the correct tab when you open extension
 {
