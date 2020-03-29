@@ -134,28 +134,36 @@ function good_clear(ID) //Clears the page for a new popup
     document.getElementById(ID).style.display = "block";
 }
 
-document.getElementById("task_list_button").onclick = function() //MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY MAKE THIS WORK PROPERLY 
+document.getElementById("task_list_button").onclick = function(){task_list();}
+
+function task_list()
 {
-    good_habits_scroll = document.documentElement.scrollTop; //records the pos of scroll bar
-    
     good_clear("task_list")
 
-    document.getElementById("task_list_cancel").onclick = function()
+    //clears all tasks
+    let tasks = document.getElementsByClassName("task_list_entry")
+    while (tasks[0])
+    {
+        tasks[0].remove();
+    }
+
+    function task_list_clear()
     {
         //closes popup
         document.getElementById("tabs").style.display = "block";
         document.getElementById("good_habits_div").style.display = "block";
         document.getElementById("task_list").style.display = "none";
         good_habits_tab();
-
-        //puts the scroll bar back in the correct pos
-        setTimeout(function(){document.documentElement.scrollTop = good_habits_scroll}, 1);
     }
 
+    document.getElementById("task_list_cancel").onclick = function(){task_list_clear()}
+
     //Displays habits
-    chrome.storage.sync.get("task_list_sort", function(habit_streaks)
+    chrome.storage.sync.get(["task_list_sort", "good_habits"], function(habit_streaks)
     {
         let local_sort;
+
+        //Sets the sort select to correct value. If first time, sets it to default
         if (habit_streaks.task_list_sort == undefined) 
         {
             chrome.storage.sync.set({"task_list_sort": "urgency"})
@@ -167,6 +175,7 @@ document.getElementById("task_list_button").onclick = function() //MAKE THIS WOR
             local_sort = habit_streaks.task_list_sort;
         }
 
+        //Generates task_list based on what sort you did
         switch(local_sort)
         {
             default:
@@ -180,13 +189,38 @@ document.getElementById("task_list_button").onclick = function() //MAKE THIS WOR
 
     document.getElementById("task_list_sort_select").onchange = function()
     {
-        chrome.storage.sync.set
+        chrome.storage.sync.set({"task_list_sort": document.getElementById("task_list_sort_select").value})
+        task_list_clear();
+        task_list();
     }
 }
 
 function generate_task(habit)
 {
+    let task = document.createElement("div");
+    task.className = "task_list_entry"
+    task.style = "margin: auto; margin-top: 15px; margin-bottom: 5px; text-align: center; width: 430px; height: 107.5px; border-style: solid; border-color: black; border-width: 1.5px;";
+    
+    let task_name = document.createElement("p");
+    task_name.style = "font-size: 14px;";
+    task_name.innerHTML = habit.name;
 
+    let task_completion_dates = document.createElement("p")
+    task_completion_dates.innerHTML = "to be completed ";
+
+    let task_completion_button = document.createElement("input");
+    task_completion_button.type = "button";
+    task_completion_button.value = "done"
+
+    let task_fail_button = document.createElement("input")
+    task_fail_button.type = "button";
+    task_fail_button.value = "failed"
+
+    task.appendChild(task_name)
+    task.appendChild(task_completion_dates)
+    task.appendChild(task_completion_button)
+    task.appendChild(task_fail_button)
+    document.getElementById("todo_list").appendChild(task);
 }
 
 //Corrects the Difficulty ranks
@@ -362,7 +396,6 @@ function good_habit_settings(id)
 //When you enter the Good Habits tab
 function good_habits_tab()
 {
-    console.log("good_habits_tab ran")
     //Removes all current ones from the page
     let good_habits = document.getElementsByClassName("good_habit");
     while (good_habits[0])
@@ -479,22 +512,6 @@ function update_good_habit_stats(ID)
         all[ID] = gh;
         chrome.storage.sync.set({"good_habits": all});
     })
-    
-    /*
-    Remake how good_habits are stored
-    instead of storing times_completed and times_failed, only store difficulty, and calculate it with this algorithm when a habit is updated
-    store completion objects
-    like
-    let date1  and date2 (dates are strings) = <month textlimit=3>+" "+<num of day of month (always 2 digits)+" "+<year>+" "+<time>
-    date1 is the starting point and date2 is ending point
-    so if it's feb 6th and you have to do the habit every day,
-    date1 would be "Feb 06 2020 00:00" and date2 would be "Feb 06 2020 23:59" //finish this
-    habit_streaks.good_habits[i].completion = [{"date": [date1, date2], "completed": <boolean>}, {etc}]
-    then this function will use habit_streaks.good_habits[ID].completion[i].completed and an algorithm 
-    to update the "best streak" "average streak" "current streak" stuff
-    */
-
-    //Make the right places call this function (probably right after good_habits[i].completion has been updated)
 }
 
 //Used to load habits onto the Good Habits dashboard
