@@ -1,5 +1,3 @@
-//This shouldn't be here if we switch back to master, right?
-
 { //Keeps track of which tab is open
 chrome.storage.sync.get('last_active_tab', function(habit_streaks) //Opens the correct tab when you open extension
 {
@@ -123,7 +121,6 @@ document.getElementById("settings").onclick = function() //If the SETTINGS butto
 
 //Good habits tab
 {
-
 function good_clear(ID) //Clears the page for a new popup
 {
     let good_habits = document.getElementsByClassName("good_habit");
@@ -188,6 +185,9 @@ document.getElementById("task_list_button").onclick = function() //MAKE THIS WOR
 }
 
 function generate_task(habit)
+{
+
+}
 
 //Corrects the Difficulty ranks
 let good_habits_difficulty_sort = [];
@@ -199,13 +199,7 @@ function sort_good_habits_difficulty()
         let entries = []
         for (let i = 0; i < habit_streaks.good_habits.length; i++)
         {
-            let ch = habit_streaks.good_habits[i];
-            let d;
-
-            if (ch.times_completed == 0 && ch.times_failed == 0) d = 0;
-            else d = 100-Math.floor(100*(parseInt(ch.times_completed)/(parseInt(ch.times_completed) + parseInt(ch.times_failed))))
-
-            entries.push({"ID": i, "dif": d})
+            entries.push({"ID": i, "dif": habit_streaks.good_habits[i].difficulty})
         }
 
         //Sorting algorithm (merge sort) using entries[i].dif
@@ -364,10 +358,11 @@ function good_habit_settings(id)
     
     })
 }
- 
+
 //When you enter the Good Habits tab
 function good_habits_tab()
 {
+    console.log("good_habits_tab ran")
     //Removes all current ones from the page
     let good_habits = document.getElementsByClassName("good_habit");
     while (good_habits[0])
@@ -375,6 +370,7 @@ function good_habits_tab()
         good_habits[0].remove();
     }
 
+    //Sorts everything before starting
     sort_good_habits_difficulty();
 
     chrome.storage.sync.get(['good_habits', 'good_habits_sort'], function(habit_streaks)
@@ -398,10 +394,7 @@ function good_habits_tab()
                     for (let i = 0; i < habit_streaks.good_habits.length; i++)
                     {
                         let ch = habit_streaks.good_habits[i];
-                        let cp;
-                        if (ch.times_completed == 0 && ch.times_failed == 0) cp = "not enough data"
-                        else cp = 100-Math.floor(100*(parseInt(ch.times_completed)/(parseInt(ch.times_completed) + parseInt(ch.times_failed))))
-                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, cp, ch.streaks, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
+                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
                     }
                     break;
                 
@@ -409,10 +402,7 @@ function good_habits_tab()
                     for (let i = habit_streaks.good_habits.length-1; i > -1; i--)
                     {
                         let ch = habit_streaks.good_habits[i];
-                        let cp;
-                        if (ch.times_completed == 0 && ch.times_failed == 0) cp = "not enough data"
-                        else cp = 100-Math.floor(100*(parseInt(ch.times_completed)/(parseInt(ch.times_completed) + parseInt(ch.times_failed))))
-                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, cp, ch.streaks, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
+                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
                     }
                     break;
 
@@ -420,10 +410,8 @@ function good_habits_tab()
                     for (let i = 0; i < habit_streaks.good_habits.length; i++)
                     {
                         let ch = habit_streaks.good_habits[good_habits_difficulty_sort[i]];
-                        let cp;
-                        if (ch.times_completed == 0 && ch.times_failed == 0) cp = "not enough data"
-                        else cp = 100-Math.floor(100*(parseInt(ch.times_completed)/(parseInt(ch.times_completed) + parseInt(ch.times_failed))))
-                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, cp, ch.streaks, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
+                        //the thing that is commented in H-E was here for the others but you don't need to copy paste the same thing from multiple sources
+                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
                     }
                     break;
 
@@ -431,10 +419,12 @@ function good_habits_tab()
                     for (let i = habit_streaks.good_habits.length-1; i > -1; i--)
                     {
                         let ch = habit_streaks.good_habits[good_habits_difficulty_sort[i]];
+                        /* copy paste difficulty generation
                         let cp;
-                        if (ch.times_completed == 0 && ch.times_failed == 0) cp = "not enough data"
+                        if (ch.times_completed == 0 && ch.times_failed == 0) cp = 0; //try removing the parseInts to see if they're necessary
                         else cp = 100-Math.floor(100*(parseInt(ch.times_completed)/(parseInt(ch.times_completed) + parseInt(ch.times_failed))))
-                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, cp, ch.streaks, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
+                        */
+                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
                     }
                     break;
             }
@@ -444,9 +434,55 @@ function good_habits_tab()
 
 function update_good_habit_stats(ID)
 {
+    chrome.storage.sync.get("good_habits", function(habit_streaks)
+    {
+        //Setup
+        let times_completed = 0;
+        let times_failed = 0;
+        let streaks = [0];
+        let best_streak = 0;
+
+        //Less typing
+        let all = habit_streaks.good_habits
+        let gh = all[ID]
+
+        //iterates through the completions
+        for (let i = 0; i < gh.completions.length; i++)
+        {
+            //if it was completed
+            if (gh.completions[i].completed)
+            {
+                times_completed+=1;
+                streaks[streaks.length-1] += 1;
+            }
+            //if it wasn't completed
+            else
+            {
+                times_failed+=1;
+                
+                //Starts a new streak if you failed your old one
+                if (streaks[streaks.length-1] != 0) streaks.push(0)
+            }
+        }
+
+        for (let i = 0; i < streaks.length; i++)
+        {
+            if (streaks[i] > best_streak) best_streak = streaks[i];
+        }   
+
+        //Updates stats based on the data we have collected from iterating
+        //try removing the parseInts to see if they're necessary
+        gh.difficulty = 100-Math.floor(100*(parseInt(times_completed)/(parseInt(times_completed) + parseInt(times_failed))))
+        gh.average_streak = streaks.reduce(function(a, b){return a+b})/streaks.length
+        gh.best_streak = best_streak;
+        gh.current_streak = streaks[streaks.length-1]
+        all[ID] = gh;
+        chrome.storage.sync.set({"good_habits": all});
+    })
+    
     /*
     Remake how good_habits are stored
-    instead of storing completion fails and completion success
+    instead of storing times_completed and times_failed, only store difficulty, and calculate it with this algorithm when a habit is updated
     store completion objects
     like
     let date1  and date2 (dates are strings) = <month textlimit=3>+" "+<num of day of month (always 2 digits)+" "+<year>+" "+<time>
@@ -458,10 +494,11 @@ function update_good_habit_stats(ID)
     to update the "best streak" "average streak" "current streak" stuff
     */
 
+    //Make the right places call this function (probably right after good_habits[i].completion has been updated)
 }
 
 //Used to load habits onto the Good Habits dashboard
-function generate_good_habit(ID, name, description, completion_schedule, creation_date, done_today, difficulty, streaks, best_streak, current_streak, difficulty_rank)
+function generate_good_habit(ID, name, description, completion_schedule, creation_date, done_today, difficulty, average_streak, best_streak, current_streak, difficulty_rank)
 {
     let habit = document.createElement("div");
     habit.className = "good_habit"
@@ -493,22 +530,27 @@ function generate_good_habit(ID, name, description, completion_schedule, creatio
     {
         chrome.storage.sync.get('good_habits', function(habit_streaks)
         {
+            //Records the position of scroll bar before clicking the button
             let scrollY = document.documentElement.scrollTop;
+            
+            //Makes things easier to work with
             let hab = habit_streaks.good_habits;
             let gh = habit_streaks.good_habits[ID];
 
+            //Updates the data to true
             gh.done_today = true;
-            gh.streaks[habit_streaks.good_habits[ID].streaks.length-1]+=1
-            gh.times_completed += 1;
-            gh.current_streak+=1;
-            if (gh.current_streak > gh.best_streak) gh.best_streak = gh.current_streak;
-
+            gh.completions.push({"date": [new Date().toString().substr(4, 11)+" 00:00", new Date().toString().substr(4, 11)+" 23:59"], "completed": true})
             hab[ID] = gh;
             chrome.storage.sync.set({"good_habits": hab});
 
-            good_habits_tab();
+            //Updates all the other habit stats like best streak, average streak etc.
+            update_good_habit_stats(ID);
 
-            setTimeout(function(){document.documentElement.scrollTop = scrollY}, 1);
+            //Resets the page to include new info
+            setTimeout(function(){good_habits_tab()}, 10);
+
+            //Puts the page back into the original position so it looks like the page wasn't reset
+            setTimeout(function(){document.documentElement.scrollTop = scrollY}, 20);
         });
     }
 
@@ -528,9 +570,8 @@ function generate_good_habit(ID, name, description, completion_schedule, creatio
 
     let average_streak_text = document.createElement("p")
     average_streak_text.style="margin-right: 25px; margin-top: 1px; display: inline-block;"
-    let average = streaks.reduce(function(a, b){return a+b})/streaks.length
-    if (average % 1 == 0) average_streak_text.innerHTML = "Average streak: "+(average)
-    else average_streak_text.innerHTML = "Average streak: "+Math.floor(average)+" to "+(Math.floor(average)+1);
+    if (average_streak % 1 == 0) average_streak_text.innerHTML = "Average streak: "+(average_streak)
+    else average_streak_text.innerHTML = "Average streak: "+Math.floor(average_streak)+" to "+(Math.floor(average_streak)+1);
 
     let best_streak_text = document.createElement("p");
     best_streak_text.innerHTML = "Your best streak: "+best_streak;
@@ -620,17 +661,17 @@ function good_habit_submit(extra, id)
     {
         chrome.storage.sync.get('good_habits', function(habit_streaks)
         {
-            if (extra == "")
+            if (extra == "") //New Habit page
             {
                 let temp = {
                     "name": name.value,
                     "description": description.value,
                     "completion_schedule": "day",
                     "creation_date": new Date().toString().substr(4, 11),
+                    "difficulty": 0,
                     "done_today": false,
-                    "times_completed": 0,
-                    "times_failed": 0,
-                    "streaks": [0],
+                    "completions": [],
+                    "average_streak": 0,
                     "best_streak": 0,
                     "current_streak": 0
                 } 
@@ -657,7 +698,7 @@ function good_habit_submit(extra, id)
                 document.getElementById("no_good_habits").style.display = "none";
                 good_habits_tab();
             }
-            else
+            else //Habit Settings page
             {
                 //Updates it
                 let x = habit_streaks.good_habits;
