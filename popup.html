@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body
+        {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fbfbfb;
+        }
+        input[type="button"]
+        {
+            background-color: #f0f0f0;
+
+            border-color: black;
+            border-width: 1px;
+            outline: none;
+
+            width: 100px;
+            height: 30px;
+            margin-right: 5px;
+            margin-left: 5px;
+        }
+        input[type="button"]:hover
+        {
+            background-color: #e0e0e0;
+        }
+        .title
+        {
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 30px;
+        }
+        #good_habit_name_input::placeholder
+        {
+            color: var(--good_habit_name_input_placeholder, grey);
+        }
+        #good_habit_description_input::placeholder
+        {
+            color: var(--good_habit_description_input_placeholder, grey);
+        }
+        #good_habit_settings_name_input::placeholder
+        {
+            color: var(--good_habit_settings_name_input_placeholder, grey);
+        }
+        #good_habit_settings_description_input::placeholder
+        {
+            color: var(--good_habit_settings_description_input_placeholder, grey);
+        }
+    </style>
+</head>
+<body style="width: 450px; text-align: center; display:block;">
+
+    <div id="tabs">
+    <input id="about" type="button" value="About">
+    <input id="good_habits" type="button" value="Good Habits">
+    <input id="bad_habits" type="button" value="Bad Habits">
+    <input id="settings" type="button" value="Settings">
+    <hr style="margin-top: 20px; margin-bottom: 20px;">
+    </div>
+
+    <div style="display: none;" id="about_div">
+        <p style="font-weight: bold; font-size: 40px; margin-bottom: 0;"> Habit Streaks+ </p>
+        <p style="margin-top: 5px;"> by Michael Skyba </p>
+
+        <p class="title"> About </p>
+        <p style="margin-top: 0; font-size: 18px;"> Habit Streaks+ is an extension that will help you instill good habits into your life, while breaking bad habits. You do this by telling HS about a new habit (good or bad), and updating HS every day based on whether you fulfilled your goal. Then, Habit Streaks can give you some useful information, like which habits are the hardest to get rid of/are hardest to maintain.</p>
+        <img style="margin-bottom: 20px;" width="400" height="209" src="https://pi.tedcdn.com/r/talkstar-assets.s3.amazonaws.com/production/playlists/playlist_321/3b911698-efa6-49e8-a000-f63bfdc106d6/talks_to_form_better_habits_1200x627.jpg?quality=89&w=800" alt="Habits Picture">
+    </div>
+
+    <div style="display: none;" id="good_habits_div">
+        <div style="margin-bottom: 55px;">
+        <!-- Title -->
+        <p class="title"> Good Habits </p> 
+
+        <!-- New Good Habit -->
+        <input id="new_good_habit_button" type="button" value="New Habit" style="height: 20px; width: 210px; float: right; margin-bottom: 5px;">
+        
+        <!-- "Sort habits by: " dropdown-->
+        <label style="float: left; font-size: 14px; margin-right: 5px;"> Sort habits by </label>
+        <select id="good_habits_sort_select" style="float: left;">
+            <option value="N-O"> Newest-Oldest </option>
+            <option value="O-N"> Oldest-Newest </option>
+            <option value="E-H"> Easiest-Hardest </option>
+            <option value="H-E"> Hardest-Easiest </option>
+        </select>
+        </div>
+
+        <input id="task_list_button" type="button" value="Task List" style="height: 20px; width: 75px; display: none; margin: auto;">
+
+        <p id="no_good_habits" style="font-size: 14px; margin-top: 75px; float: none;"> You don't have any habits. Click the "New Habit" button to create a new one! </p>
+
+    </div>
+
+    <div style="text-align: center; display: none; margin-top: 0;" id="good_habits_settings"> 
+        <!-- Cancel button -->
+        <input style="margin-bottom: 20px; text-align: center; float: right; width: 30px; margin-left: 0;" type="button" value="X" id="good_habit_settings_cancel">
+        
+        <!-- Title -->
+        <p class="title" style="margin-top: 0; clear: right;"> Habit Settings </p>
+
+        <!-- Habit Name Input -->
+        <input maxlength="20" type="text" style="text-align: center; margin: auto;" placeholder="Habit name" id="good_habit_settings_name_input">
+        <p> Characters remaining: <span id="good_habit_settings_name_characters">20</span></p>
+        
+        <!-- Habit Description Input -->
+        <input maxlength="50" type="text" style="text-align: center; margin: auto; width: 350px;" placeholder="Brief habit description" id="good_habit_settings_description_input">
+        <p> Characters remaining: <span id="good_habit_settings_description_characters">50</span></p>
+        
+        <label> To be completed every </label>
+        <select id="good_habit_settings_complete_select">
+            <option value="day"> Day </option>
+            <option value="custom"> Custom </option>
+        </select>
+        <p style="font-size: 11px; font-weight: bold; color: red;"> Warning: changing the completion dates will reset all progress for that habit. </p>
+
+        <!-- Save button and submit button -->
+        <input style="margin-top: 10px; height: 20px; width: 75px;" type="button" value="Save" id="good_habit_settings_submit">
+        <br>
+        <input style="color: red; font-weight: bold; margin-top: 30px; height: 20px; width: 100px;" type="button" value="Delete Habit" id="good_habit_settings_delete">
+        <p style="font-size: 11px; font-weight: bold; color: red;"> this action cannot be undone </p>
+    </div>
+
+    <div style="text-align: center; display: none; margin-top: 0;" id="new_good_habit_popup">
+
+        <!-- Cancel button -->
+        <input style="margin-bottom: 20px; text-align: center; float: right; width: 30px; margin-left: 0;" type="button" value="X" id="new_good_habit_cancel">
+        
+        <!-- Title -->
+        <p class="title" style="margin-top: 0; clear: right;"> New Good Habit </p>
+
+        <!-- Habit Name Input -->
+        <input maxlength="20" type="text" style="text-align: center; margin: auto;" placeholder="Habit name" id="good_habit_name_input">
+        <p> Characters remaining: <span id="good_habit_name_characters">20</span></p>
+        
+        <!-- Habit Description Input -->
+        <input maxlength="50" type="text" style="text-align: center; margin: auto; width: 350px;" placeholder="Brief habit description" id="good_habit_description_input">
+        <p> Characters remaining: <span id="good_habit_description_characters">50</span></p>
+        
+        <br>
+        <input style="margin-top: 40px; height: 20px; width: 75px;" type="button" value="Submit" id="new_good_habit_submit">
+    </div>
+
+    <div id="task_list" style="display: none;"> 
+        <!-- Cancel button -->
+        <input style="margin-bottom: 20px; text-align: center; float: right; width: 30px; margin-left: 0;" type="button" value="X" id="task_list_cancel">
+        
+        <!-- Title -->
+        <p class="title" style="margin-top: 0; clear: right; margin-bottom: 10px;"> Task List </p>
+
+        <label> Sort habits by </label>
+        <select id="task_list_sort_select">
+            <option value="urgency"> Urgency </option>
+            <option value="E-H"> Easiest-Hardest </option>
+            <option value="H-E"> Hardest-Easiest</option>
+        </select>
+    </div>
+
+    <div style="display: none;" id="bad_habits_div">
+        <p class="title"> Bad Habits </p>
+    </div>
+
+    <div style="display: none;" id="settings_div">
+        <p class="title"> Settings </p>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
