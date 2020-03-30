@@ -46,7 +46,16 @@
         {
             color: var(--good_habit_settings_description_input_placeholder, grey);
         }
+        .task_list
+        {
+            width: 48%;
+            height: 100%;
+            margin-top: 25px;
+            border: 2px solid black;
+            margin-bottom: 10px;
+        }
     </style>
+
 </head>
 <body style="width: 450px; text-align: center; display:block;">
 
@@ -154,12 +163,16 @@
             <option value="H-E"> Hardest-Easiest</option>
         </select>
 
-        <div style="display: none;" id="late_list">
-            <p> Late </p>
+        <br>
+
+        <div id="late_list" class="task_list" style="float: left;">
+            <p class="title" style="font-size: 20px; margin-top: 0;"> Late </p>
+            <p style="font-size: 14px;" id="caught_up_late" style="display: none;"> Nothing late! </p>
         </div>
 
-        <div id="todo_list">
-            <p> Todo </p>
+        <div id="todo_list" class="task_list" style="float: right;">
+            <p class="title" style="font-size: 20px; margin-top: 0;"> Todo </p>
+            <p style="font-size: 14px;" id="caught_up_todo" style="display: none;"> All caught up! </p>
         </div>
     </div>
 
