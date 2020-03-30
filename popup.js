@@ -586,6 +586,8 @@ function task_list()
         //Keeping track of whether or not to show the "All caught up" text
         var caught_up = true
 
+        let first = true;
+
         //Generates task_list based on what sort you did
         switch(local_sort)
         {
@@ -595,12 +597,16 @@ function task_list()
                     //less typing
                     let habit = habit_streaks.good_habits[good_habits_difficulty_sort[i]]
 
-                    if (!habit.done_today) 
+                    if (!habit.done_today)
                     {
                         //Only generates the task if you haven't said anything about it yet
 
                         //Makes the first habit closer to the top
-                        if (i == 0) generate_task(habit, good_habits_difficulty_sort[i], true)
+                        if (first) 
+                        {
+                            first = false
+                            generate_task(habit, good_habits_difficulty_sort[i], true)
+                        }
                         else generate_task(habit, good_habits_difficulty_sort[i], false)
 
                         caught_up = false
@@ -625,17 +631,17 @@ function generate_task(habit, ID, first)
     let task = document.createElement("div");
     task.className = "task_list_entry"
     task.style = "margin-bottom: 20px; height: 70px;";
-    if (first == true) task.style.marginTop = "0"
+    if (first) task.style.marginTop = "5px";
     else task.style.marginTop = "40px"
 
     
     let task_name = document.createElement("p");
-    task_name.style = "font-size: 14px; margin-bottom: 5px; font-weight: bold;";
+    task_name.style = "font-size: 14px; margin-top: 0; margin-bottom: 5px; font-weight: bold;";
     task_name.innerHTML = habit.name;
 
     let task_completion_dates = document.createElement("p")
-    task_completion_dates.style = "margin-top: 0;"
-    task_completion_dates.innerHTML = "to be completed "+new Date().toString().substr(4, 11)+" 00:00 to "+new Date().toString().substr(4, 11)+" 23:59";
+    task_completion_dates.style = "margin-top: 0; white-space: pre-line;"
+    task_completion_dates.innerHTML = "to be completed before\n"+new Date().toString().substr(4, 11)+" 23:59";
 
     let task_completion_button = document.createElement("input");
     task_completion_button.style = "width: 75px; height: 20px;"
