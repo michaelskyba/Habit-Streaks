@@ -134,6 +134,25 @@ document.getElementById("good_habits_sort_select").onchange = function()
     setTimeout(function(){document.documentElement.scrollTop = sscrollY}, 1);
 }
 
+function habit_completed(ID)
+{
+    chrome.storage.sync.get('good_habits', function(habit_streaks)
+    {   
+        //Makes things easier to work with
+        let hab = habit_streaks.good_habits;
+        let gh = habit_streaks.good_habits[ID];
+
+        //Updates the data to true
+        gh.done_today = true;
+        gh.completions.push({"date": [new Date().toString().substr(4, 11)+" 00:00", new Date().toString().substr(4, 11)+" 23:59"], "completed": true})
+        hab[ID] = gh;
+        chrome.storage.sync.set({"good_habits": hab});
+
+        //Updates all the other habit stats like best streak, average streak etc.
+        update_good_habit_stats(ID);
+    });
+}
+
 //When you enter the Good Habits tab
 function good_habits_tab()
 {
@@ -231,30 +250,18 @@ function generate_good_habit(ID, name, description, completion_schedule, creatio
     completion_button.style = "width: 330px; height: 30px;";
     completion_button.onclick = function()
     {
-        chrome.storage.sync.get('good_habits', function(habit_streaks)
-        {
-            //Records the position of scroll bar before clicking the button
-            let scrollY = document.documentElement.scrollTop;
-            
-            //Makes things easier to work with
-            let hab = habit_streaks.good_habits;
-            let gh = habit_streaks.good_habits[ID];
+        //Records the position of scroll bar before clicking the button
+        let scrollY = document.documentElement.scrollTop;
 
-            //Updates the data to true
-            gh.done_today = true;
-            gh.completions.push({"date": [new Date().toString().substr(4, 11)+" 00:00", new Date().toString().substr(4, 11)+" 23:59"], "completed": true})
-            hab[ID] = gh;
-            chrome.storage.sync.set({"good_habits": hab});
+        //Updates stats
+        habit_completed(ID)
+        
+        //Resets the page to include new info
+        setTimeout(function(){good_habits_tab()}, 10);
 
-            //Updates all the other habit stats like best streak, average streak etc.
-            update_good_habit_stats(ID);
-
-            //Resets the page to include new info
-            setTimeout(function(){good_habits_tab()}, 10);
-
-            //Puts the page back into the original position so it looks like the page wasn't reset
-            setTimeout(function(){document.documentElement.scrollTop = scrollY}, 20);
-        });
+        //Puts the page back into the original position so it looks like the page wasn't reset
+        setTimeout(function(){document.documentElement.scrollTop = scrollY}, 20);
+        
     }
 
     document.getElementById("good_habits_settings").style.display = "none";
@@ -385,7 +392,81 @@ function good_habit_settings(id)
 }
 
 //General
-{ 
+{
+
+//Corrects the Difficulty ranks
+var good_habits_difficulty_sort = [];
+function sort_good_habits_difficulty()
+{
+    chrome.storage.sync.get("good_habits", function(habit_streaks)
+    {
+        //Makes an easier way to work with the difficulty of each habit
+        let entries = []
+        for (let i = 0; i < habit_streaks.good_habits.length; i++)
+        {
+            entries.push({"ID": i, "dif": habit_streaks.good_habits[i].difficulty})
+        }
+
+        //Sorting algorithm (merge sort) using entries[i].dif
+        function merge(arra, arrb)
+        {
+            let arrc = []
+
+            while (arra.length > 0 && arrb.length > 0)
+            {
+                if (arra[0].dif > arrb[0].dif)
+                {
+                    arrc.push(arrb[0])
+                    arrb.shift()
+                }
+                else
+                {
+                    arrc.push(arra[0])
+                    arra.shift();
+                }
+            }
+
+            while (arra.length > 0)
+            {
+                arrc.push(arra[0])
+                arra.shift()
+            }
+
+            while (arrb.length > 0)
+            {
+                arrc.push(arrb[0])
+                arrb.shift()
+            }
+
+            return arrc
+        }
+
+        function merge_sort(arr)
+        {
+            if (arr.length < 2) return arr
+
+            let arr1 = arr.slice(0, Math.floor(arr.length/2))
+            let arr2 = arr.slice(arr1.length, arr.length)
+
+            arr1 = merge_sort(arr1)
+            arr2 = merge_sort(arr2)
+
+            let af = merge(arr1, arr2)
+            return af
+        }
+
+        entries = merge_sort(entries)
+    
+        //Takes out the difficulties to create one list of IDs
+        let final = []
+        for (let i = 0; i < entries.length; i++)
+        {
+            final.push(entries[i].ID)
+        }
+
+        good_habits_difficulty_sort = final;
+    })
+}
 
 function update_good_habit_stats(ID)
 {
@@ -461,6 +542,15 @@ chrome.storage.sync.get('good_habits', function(habit_streaks)
 
 document.getElementById("task_list_button").onclick = function(){task_list();}
 
+function task_list_clear()
+{
+    //closes popup
+    document.getElementById("tabs").style.display = "block";
+    document.getElementById("good_habits_div").style.display = "block";
+    document.getElementById("task_list").style.display = "none";
+    good_habits_tab();
+}
+
 function task_list()
 {
     good_clear("task_list")
@@ -474,15 +564,6 @@ function task_list()
 
     //Gets rid of all caught up text (it will come back later if needed)
     document.getElementById("caught_up_todo").style.display = "none";
-
-    function task_list_clear()
-    {
-        //closes popup
-        document.getElementById("tabs").style.display = "block";
-        document.getElementById("good_habits_div").style.display = "block";
-        document.getElementById("task_list").style.display = "none";
-        good_habits_tab();
-    }
 
     document.getElementById("task_list_cancel").onclick = function(){task_list_clear()}
 
@@ -517,7 +598,11 @@ function task_list()
                     if (!habit.done_today) 
                     {
                         //Only generates the task if you haven't said anything about it yet
-                        generate_task(habit)
+
+                        //Makes the first habit closer to the top
+                        if (i == 0) generate_task(habit, good_habits_difficulty_sort[i], true)
+                        else generate_task(habit, good_habits_difficulty_sort[i], false)
+
                         caught_up = false
                     }
                 }
@@ -535,11 +620,14 @@ function task_list()
     }
 }
 
-function generate_task(habit)
+function generate_task(habit, ID, first)
 {
     let task = document.createElement("div");
     task.className = "task_list_entry"
-    task.style = "margin-top: 15px; margin-bottom: 20px; height: 70px; ";
+    task.style = "margin-bottom: 20px; height: 70px;";
+    if (first == true) task.style.marginTop = "0"
+    else task.style.marginTop = "40px"
+
     
     let task_name = document.createElement("p");
     task_name.style = "font-size: 14px; margin-bottom: 5px; font-weight: bold;";
@@ -553,91 +641,25 @@ function generate_task(habit)
     task_completion_button.style = "width: 75px; height: 20px;"
     task_completion_button.type = "button";
     task_completion_button.value = "done"
+    task_completion_button.onclick = function()
+    {
+        //Records the position of scroll bar before clicking the button
+        let scrollY = document.documentElement.scrollTop;
 
-    let task_fail_button = document.createElement("input")
-    task_fail_button.style = "width: 75px; height: 20px;"
-    task_fail_button.type = "button";
-    task_fail_button.value = "failed"
+        //Updates stats
+        habit_completed(ID)
+        
+        //Resets the page to include new info
+        setTimeout(function(){task_list_clear(); task_list();}, 10);
+
+        //Puts the page back into the original position so it looks like the page wasn't reset
+        setTimeout(function(){document.documentElement.scrollTop = scrollY}, 20);
+    }
 
     task.appendChild(task_name)
     task.appendChild(task_completion_dates)
     task.appendChild(task_completion_button)
-    task.appendChild(task_fail_button)
     document.getElementById("todo_list").appendChild(task);
-}
-
-//Corrects the Difficulty ranks
-var good_habits_difficulty_sort = [];
-function sort_good_habits_difficulty()
-{
-    chrome.storage.sync.get("good_habits", function(habit_streaks)
-    {
-        //Makes an easier way to work with the difficulty of each habit
-        let entries = []
-        for (let i = 0; i < habit_streaks.good_habits.length; i++)
-        {
-            entries.push({"ID": i, "dif": habit_streaks.good_habits[i].difficulty})
-        }
-
-        //Sorting algorithm (merge sort) using entries[i].dif
-        function merge(arra, arrb)
-        {
-            let arrc = []
-
-            while (arra.length > 0 && arrb.length > 0)
-            {
-                if (arra[0].dif > arrb[0].dif)
-                {
-                    arrc.push(arrb[0])
-                    arrb.shift()
-                }
-                else
-                {
-                    arrc.push(arra[0])
-                    arra.shift();
-                }
-            }
-
-            while (arra.length > 0)
-            {
-                arrc.push(arra[0])
-                arra.shift()
-            }
-
-            while (arrb.length > 0)
-            {
-                arrc.push(arrb[0])
-                arrb.shift()
-            }
-
-            return arrc
-        }
-
-        function merge_sort(arr)
-        {
-            if (arr.length < 2) return arr
-
-            let arr1 = arr.slice(0, Math.floor(arr.length/2))
-            let arr2 = arr.slice(arr1.length, arr.length)
-
-            arr1 = merge_sort(arr1)
-            arr2 = merge_sort(arr2)
-
-            let af = merge(arr1, arr2)
-            return af
-        }
-
-        entries = merge_sort(entries)
-    
-        //Takes out the difficulties to create one list of IDs
-        let final = []
-        for (let i = 0; i < entries.length; i++)
-        {
-            final.push(entries[i].ID)
-        }
-
-        good_habits_difficulty_sort = final;
-    })
 }
 }
 
