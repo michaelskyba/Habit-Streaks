@@ -127,6 +127,7 @@ I know I first want to make done_today false once it's a new day
 
 When should I check?
 I should check when the habits are about to be displayed anywhere
+i.e. good_habits_tab() and task_list()
 
 How do I check?
 I can keep track of the date that the habit should be completed by in chrome storage
@@ -186,6 +187,10 @@ function good_habits_tab()
     {
         good_habits[0].remove();
     }
+
+    //
+    //Update the times now
+    update_good_habits_time();
 
     //Sorts everything before starting
     sort_good_habits_difficulty();
@@ -419,6 +424,60 @@ function good_habit_settings(id)
 //General
 {
 
+function update_good_habits_time() //NOT TESTED
+{
+    /*
+    How this function will work: 
+    retrieve good_habits from storage
+    
+    for habit in good_habits:
+        while completion date has passed:
+            if done_today:
+                set done_today to false
+            else:
+                throw the instance to the late array
+                push it as failed in the completions array
+        change the completion date to +1 day
+    */
+
+    chrome.storage.sync.get(["good_habits", "late"], function(habit_streaks)
+    {
+        //Easier to update chrome storage
+        let habits = habit_streaks.good_habits;
+
+        //updates EVERY habit
+        for (let i = 0; i < habits.length; i++)
+        {
+            //Less typing
+            let habit = habits[i];
+
+            //for multiple late days
+            while (date_greater_than(new Date().toString().substr(4, 17), habit.completion_date))
+            {
+                if (habit.done_today) habit.done_today = false;
+                else
+                {
+                    //Sets this instance to late
+                    let late = habit_streaks.late;
+                    late.push([habit.completion.date.substr(0, 12)+"00:00", habit.completion_date])
+
+                    //Sets this day to 'failed'
+                    habit.completions.push({"date": [habit.completion.date.substr(0, 12)+"00:00", habit.completion_date], "completed": false})
+                }
+
+                //Changes the completion date to +1 day
+                let real = new Date(habit.completion_date)
+                real.setDate(real.getDate()+1)
+                habit.completion_date = real.toString().substr(4, 17);
+
+                //Updates data
+                habits[i] = habit;
+                chrome.storage.sync.set({"late": late, "good_habits": habits})
+            }
+        }
+    })
+}
+
 //mainly for checking if current date is past date x
 function date_greater_than (date1, date2)
 {
@@ -593,10 +652,12 @@ function good_clear(ID) //Clears the page for a new popup
     document.getElementById(ID).style.display = "block";
 }
 
-chrome.storage.sync.get('good_habits', function(habit_streaks)
+//Makes things not undefined at the start
+chrome.storage.sync.get(['good_habits', 'late', 'task_list_sort'], function(habit_streaks)
 {
-    //Makes good_habits not undefined at start
     if (habit_streaks.good_habits == undefined) chrome.storage.sync.set({"good_habits": []})
+    if (habit_streaks.late == undefined) chrome.storage.sync.set({"late": []})
+    if (habit_streaks.task_list_sort == undefined) chrome.storage.sync.set({"task_list_sort": "urgency"})
 })
 }
 
@@ -633,19 +694,13 @@ function task_list()
     //Displays habits
     chrome.storage.sync.get(["task_list_sort", "good_habits"], function(habit_streaks)
     {
+        //less typing
         let local_sort;
 
-        //Sets the sort select to correct value. If first time, sets it to default
-        if (habit_streaks.task_list_sort == undefined) 
-        {
-            chrome.storage.sync.set({"task_list_sort": "urgency"})
-            local_sort = "urgency";
-        }
-        else
-        {
-            document.getElementById("task_list_sort_select").value = habit_streaks.task_list_sort;
-            local_sort = habit_streaks.task_list_sort;
-        }
+        //Sets the sort select to correct value
+        local_sort = habit_streaks.task_list_sort;
+        document.getElementById("task_list_sort_select").value = local_sort;
+
         //Keeping track of whether or not to show the "All caught up" text
         var caught_up = true
 
@@ -704,7 +759,7 @@ function generate_task(habit, ID, first)
 
     let task_completion_dates = document.createElement("p")
     task_completion_dates.style = "margin-top: 0; white-space: pre-line;"
-    task_completion_dates.innerHTML = "to be completed before\n"+new Date().toString().substr(4, 11)+" 23:59";
+    task_completion_dates.innerHTML = "to be completed before\n"+habit.completion_date;
 
     let task_completion_button = document.createElement("input");
     task_completion_button.style = "width: 75px; height: 20px;"
