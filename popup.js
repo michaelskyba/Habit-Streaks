@@ -119,6 +119,30 @@ document.getElementById("settings").onclick = function() //If the SETTINGS butto
 }
 }
 
+/*
+Difficult questions
+
+What should I do first?
+I know I first want to make done_today false once it's a new day
+
+When should I check?
+I should check when the habits are about to be displayed anywhere
+
+How do I check?
+I can keep track of the date that the habit should be completed by in chrome storage
+Then, I can compare the current date with the completion date
+
+Where should I check?
+In good_habits_tab(), right before the difficulty sort
+because the difficulty sort won't be accurate otherwise
+
+Implement the above and work from there
+
+Using a background script to track time will not work
+Because the program would break if things were supposed to happen when they were offline
+and it would be laggy
+*/
+
 //Good habits tab
 {
 
@@ -187,7 +211,7 @@ function good_habits_tab()
                     for (let i = 0; i < habit_streaks.good_habits.length; i++)
                     {
                         let ch = habit_streaks.good_habits[i];
-                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
+                        generate_good_habit(i, ch.name, ch.description, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
                     }
                     break;
                 
@@ -195,7 +219,7 @@ function good_habits_tab()
                     for (let i = habit_streaks.good_habits.length-1; i > -1; i--)
                     {
                         let ch = habit_streaks.good_habits[i];
-                        generate_good_habit(i, ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
+                        generate_good_habit(i, ch.name, ch.description, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.indexOf(i)+1);
                     }
                     break;
 
@@ -203,7 +227,7 @@ function good_habits_tab()
                     for (let i = 0; i < habit_streaks.good_habits.length; i++)
                     {
                         let ch = habit_streaks.good_habits[good_habits_difficulty_sort[i]];
-                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
+                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
                     }
                     break;
 
@@ -211,7 +235,7 @@ function good_habits_tab()
                     for (let i = habit_streaks.good_habits.length-1; i > -1; i--)
                     {
                         let ch = habit_streaks.good_habits[good_habits_difficulty_sort[i]];
-                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.completion_schedule, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
+                        generate_good_habit(good_habits_difficulty_sort[i], ch.name, ch.description, ch.creation_date, ch.done_today, ch.difficulty, ch.average_streak, ch.best_streak, ch.current_streak, good_habits_difficulty_sort.length-i);
                     }
                     break;
             }
@@ -220,11 +244,11 @@ function good_habits_tab()
 }
 
 //Used to load habits onto the Good Habits dashboard
-function generate_good_habit(ID, name, description, completion_schedule, creation_date, done_today, difficulty, average_streak, best_streak, current_streak, difficulty_rank)
+function generate_good_habit(ID, name, description, creation_date, done_today, difficulty, average_streak, best_streak, current_streak, difficulty_rank)
 {
     let habit = document.createElement("div");
     habit.className = "good_habit"
-    habit.style = "margin: auto; margin-top: 15px; margin-bottom: 5px; text-align: center; width: 430px; height: 215px; border-style: solid; border-color: black; border-width: 1.5px; background-color: #f8f8f8;";
+    habit.style = "margin: auto; margin-top: 15px; margin-bottom: 5px; text-align: center; width: 430px; height: 200px; border-style: solid; border-color: black; border-width: 1.5px; background-color: #f8f8f8;";
 
     let title = document.createElement("p");
     title.style = "float: none; clear: left; font-size: 18px; font-weight: bold; margin-top: 20px; margin-bottom: 0;"
@@ -246,8 +270,8 @@ function generate_good_habit(ID, name, description, completion_schedule, creatio
 
     let completion_button = document.createElement("input");
     completion_button.type = "button";
-    completion_button.value = "I completed this habit (to be completed every: "+completion_schedule+").";
-    completion_button.style = "width: 330px; height: 30px;";
+    completion_button.value = "I completed this habit.";
+    completion_button.style = "width: 150px; height: 25px;";
     completion_button.onclick = function()
     {
         //Records the position of scroll bar before clicking the button
@@ -296,6 +320,7 @@ function generate_good_habit(ID, name, description, completion_schedule, creatio
     habit.appendChild(about);
     if (done_today) habit.appendChild(completion_text);
     else habit.appendChild(completion_button);
+    habit.appendChild(document.createElement("br"))
     habit.appendChild(difficulty_ranking_text);
     habit.appendChild(difficulty_text);
     habit.appendChild(document.createElement("br"))
@@ -393,6 +418,44 @@ function good_habit_settings(id)
 
 //General
 {
+
+//mainly for checking if current date is past date x
+function date_greater_than (date1, date2)
+{
+    //Dates should be in the format Month(maxlength=3) Day(num minlength=2), Year hour(minlength=2):minute(minlength=2)(24h time)
+    //Eg Apr 03 2020 23:59
+    //the function caller is asking "is date1 greater than date2?" and gets a boolean in return
+
+    let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    //Compares the years
+    if (parseInt(date1.substr(7, 4)) > parseInt(date2.substr(7, 4))) return true
+    else if (parseInt(date1.substr(7, 4)) < parseInt(date2.substr(7, 4))) return false
+    else //the elses are for if both values are the same
+    {
+        //Compares the months
+        if (months.indexOf(date1.substr(0, 3)) > months.indexOf(date2.substr(0, 3))) return true
+        else if (months.indexOf(date1.substr(0, 3)) < months.indexOf(date2.substr(0, 3))) return false
+        else
+        {
+            //Compares the days
+            if (parseInt(date1.substr(4, 2)) > parseInt(date2.substr(4, 2))) return true
+            if (parseInt(date1.substr(4, 2)) < parseInt(date2.substr(4, 2))) return false
+            else
+            {
+                //Compares the hours
+                if (parseInt(date1.substr(12, 2)) > parseInt(date2.substr(12, 2))) return true
+                else if (parseInt(date1.substr(12, 2)) < parseInt(date2.substr(12, 2))) return false
+                else
+                {
+                    //Compares minutes
+                    if (parseInt(date1.substr(15, 2)) > parseInt(date2.substr(15, 2))) return true
+                    else return false
+                }
+            }
+        }
+    }
+}
 
 //Corrects the Difficulty ranks
 var good_habits_difficulty_sort = [];
@@ -740,8 +803,8 @@ function good_habit_submit(extra, id)
                 let temp = {
                     "name": name.value,
                     "description": description.value,
-                    "completion_schedule": "day",
                     "creation_date": new Date().toString().substr(4, 11),
+                    "completion_date": new Date().toString().substr(4, 11)+" 23:59",
                     "difficulty": 0,
                     "done_today": false,
                     "completions": [],
