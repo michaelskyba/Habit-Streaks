@@ -276,7 +276,7 @@ function generate_good_habit(ID, name, description, creation_date, done_today, d
     let completion_button = document.createElement("input");
     completion_button.type = "button";
     completion_button.value = "I completed this habit.";
-    completion_button.style = "width: 150px; height: 25px;";
+    completion_button.style = "width: 150px; height: 25px; margin-bottom: 10px;";
     completion_button.onclick = function()
     {
         //Records the position of scroll bar before clicking the button
@@ -296,7 +296,7 @@ function generate_good_habit(ID, name, description, creation_date, done_today, d
     document.getElementById("good_habits_settings").style.display = "none";
 
     let completion_text = document.createElement("p");
-    completion_text.style = "white-space: pre-line;"
+    completion_text.style = "white-space: pre-line; margin-bottom: 8px;"
     completion_text.innerHTML = "You have completed this habit for now.\nIf you misclicked, visit the Habit settings to undo."
 
     let difficulty_ranking_text = document.createElement("p"); //This isn't actual difficulty rank
@@ -324,8 +324,12 @@ function generate_good_habit(ID, name, description, creation_date, done_today, d
     habit.appendChild(title);
     habit.appendChild(about);
     if (done_today) habit.appendChild(completion_text);
-    else habit.appendChild(completion_button);
-    habit.appendChild(document.createElement("br"))
+    else 
+    {
+        habit.appendChild(completion_button);
+        habit.appendChild(document.createElement("br"))
+    }
+    
     habit.appendChild(difficulty_ranking_text);
     habit.appendChild(difficulty_text);
     habit.appendChild(document.createElement("br"))
