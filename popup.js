@@ -343,6 +343,23 @@ function generate_good_habit(ID, name, description, creation_date, done_today, d
 //Settings
 {
 
+//Completion History
+{
+function completion_history()
+{
+
+}
+
+function dim_history(boolean)
+{
+    if (boolean) document.getElementById("completion_history").src = "history_hover.png"
+    else document.getElementById("completion_history").src = "history.png"
+}
+
+document.getElementById("completion_history").onmouseover = dim_history(true)
+document.getElementById("completion_history").onmouseout = dim_history(false)
+}
+
 //For when the user clicks settings on one of the habits
 let good_habits_scroll;
 function good_habit_settings(id) 
@@ -458,11 +475,12 @@ function update_good_habits_time() //NOT TESTED
             //for multiple late days
             while (date_greater_than(new Date().toString().substr(4, 17), habit.completion_date))
             {
+                let late = habit_streaks.late;
+
                 if (habit.done_today) habit.done_today = false;
                 else
                 {
                     //Sets this instance to late
-                    let late = habit_streaks.late;
                     late.push([habit.completion.date.substr(0, 12)+"00:00", habit.completion_date])
 
                     //Sets this day to 'failed'

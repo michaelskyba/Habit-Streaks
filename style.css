@@ -1,0 +1,111 @@
+/*
+|| Multiple elements in the same selector ////////////////////////////////////////////////////////////
+*/
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #fbfbfb;
+    width: 450px;
+    text-align: center;
+    display:block;
+}
+
+.title {
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+#about_div, #good_habits_div {
+    display: none;
+}
+
+input [type="button"] {
+    background-color: #f0f0f0;
+
+    border-color: black;
+    border-width: 1px;
+    outline: none;
+
+    width: 100px;
+    height: 30px;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+input[type="button"]:hover {
+    background-color: #e0e0e0;
+}
+
+/*
+|| Tabs ////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+hr {
+    margin-top: 20px; margin-bottom: 20px;
+}
+
+/*
+|| About Div ////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+#about_div p:nth-child(1) {
+    font-weight: bold;
+    font-size: 40px;
+    margin-bottom: 0;
+}
+
+#about_div p:nth-child(2) {
+    margin-top: 5px;
+}
+
+#about_div p:nth-child(4) {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+#about_div img
+{
+    margin-bottom: 20px;
+}
+
+/*
+|| Good Habits Div //////////////////////////////////////////////////////////////////////////
+*/
+
+#good_habits_div div
+{
+    margin-bottom: 55px;
+}
+
+#good_habits_div input:nth-child(1)
+{
+    height: 20px;
+    width: 210px;
+    float: right;
+    margin-bottom: 5px;
+}
+
+#good_habit_name_input::placeholder {
+    color: var(--good_habit_name_input_placeholder, grey);
+}
+
+#good_habit_description_input::placeholder {
+    color: var(--good_habit_description_input_placeholder, grey);
+}
+
+#good_habit_settings_name_input::placeholder {
+    color: var(--good_habit_settings_name_input_placeholder, grey);
+}
+
+#good_habit_settings_description_input::placeholder {
+    color: var(--good_habit_settings_description_input_placeholder, grey);
+}
+
+.task_list {
+    width: 48%;
+    height: 100%;
+    margin-top: 25px;
+    border: 2px solid black;
+    margin-bottom: 10px;
+}
