@@ -128,7 +128,13 @@
         <input style="margin-top: 10px; height: 20px; width: 75px;" type="button" value="Save" id="good_habit_settings_submit">
         <br>
         <input style="color: red; font-weight: bold; margin-top: 30px; height: 20px; width: 100px;" type="button" value="Delete Habit" id="good_habit_settings_delete">
-        <p style="font-size: 11px; font-weight: bold; color: red;"> this action cannot be undone </p>
+    </div>
+
+    <div id="completion_history">
+        <!-- Exit button -->
+
+        <!-- Title -->
+        <p class="title"> Completion History of "<span id="completion_history_habit_name"></span>"</p>
     </div>
 
     <div style="text-align: center; display: none; margin-top: 0;" id="new_good_habit_popup">
@@ -151,7 +157,7 @@
         <input style="margin-top: 40px; height: 20px; width: 75px;" type="button" value="Submit" id="new_good_habit_submit">
     </div>
 
-    <div id="task_list" style="display: none;"> 
+    <div style="display: none;" id="task_list" > 
         <!-- Cancel button -->
         <input style="margin-bottom: 20px; text-align: center; float: right; width: 30px; margin-left: 0;" type="button" value="X" id="task_list_cancel">
         
