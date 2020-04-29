@@ -343,24 +343,6 @@ function generate_good_habit(ID, name, description, creation_date, done_today, d
 //Settings
 {
 
-//Completion History
-{
-function completion_history()
-{
-
-}
-
-function dim_history(boolean)
-{
-    if (boolean) document.getElementById("completion_history").src = "history_hover.png";
-    else document.getElementById("completion_history").src = "history.png"
-}
-
-document.getElementById("completion_history").onmouseover = function(){dim_history(true)}
-document.getElementById("completion_history").onmouseout = function(){dim_history(false)}
-document.getElementById("completion_history").onclick = function(){completion_history()};
-}
-
 //For when the user clicks settings on one of the habits
 let good_habits_scroll;
 function good_habit_settings(id) 
@@ -404,6 +386,63 @@ function good_habit_settings(id)
 
             //puts the scroll bar back in the correct pos
             setTimeout(function(){document.documentElement.scrollTop = good_habits_scroll}, 1);
+        }
+
+        //Completion History
+        {   
+            //Making it be darker when you hover over the button
+            function dim_history(boolean)
+            {
+                if (boolean) document.getElementById("completion_history_button").src = "history_hover.png";
+                else document.getElementById("completion_history_button").src = "history.png"
+            }
+            document.getElementById("completion_history_button").onmouseover = function(){dim_history(true)}
+            document.getElementById("completion_history_button").onmouseout = function(){dim_history(false)}
+
+            //when you click the history completion button
+            document.getElementById("completion_history_button").onclick = 
+            function()
+            {
+                //Sets up the initial elements
+                document.getElementById("completion_history").style.display = "block";
+                document.getElementById("good_habits_settings").style.display = "none";
+                document.getElementById("completion_history_habit_name").innerHTML = habit_streaks.good_habits[id].name;
+
+                //when you click the X
+                document.getElementById("completion_history_cancel").onclick = function()
+                {
+                    //Delets the entries that already exist
+                    let entries = document.getElementsByClassName("entry");
+                    while (entries[0])
+                    {
+                        entries[0].remove();
+                    }
+
+                    //Deletes the hrs
+                    let hrs = document.getElementsByTagName("hr")
+                    while (hrs[0])
+                    {
+                        hrs[0].remove();
+                    }
+
+                    //Switches back to the settings page
+                    document.getElementById("completion_history").style.display = "none";
+                    document.getElementById("good_habits_settings").style.display = "block";
+                }
+                
+                
+
+                //Displays the entries
+                for (let i = habit_streaks.good_habits.length; i > 0; i--)
+                {
+                    let entry = document.createElement('div');
+                    entry.style = "height: 50px; background-color: gray;"
+                    entry.className = "entry";
+
+                    document.getElementById("completion_history_entries").appendChild(entry);
+                    if (i > 1) document.getElementById("completion_history_entries").appendChild(document.createElement("hr"));
+                }
+            };
         }
 
         //When you click save
