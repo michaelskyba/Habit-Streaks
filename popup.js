@@ -1,9 +1,9 @@
 { //Keeps track of which tab is open
-chrome.storage.sync.get('last_active_tab', function(habit_streaks) //Opens the correct tab when you open extension
+chrome.storage.local.get('last_active_tab', function(habit_streaks) //Opens the correct tab when you open extension
 {
     if (habit_streaks.last_active_tab == undefined) //If you are opening extension for the first time, sets default
     {
-        chrome.storage.sync.set({"last_active_tab": "about"})
+        chrome.storage.local.set({"last_active_tab": "about"})
         document.getElementById("about").style.color = "#04a12b";
         document.getElementById("about").style.fontWeight = "bold";
         document.getElementById("about").style.textDecoration = "underline";
@@ -28,7 +28,7 @@ chrome.storage.sync.get('last_active_tab', function(habit_streaks) //Opens the c
 
 document.getElementById("about").onclick = function() //If the ABOUT button is clicked
 {
-    chrome.storage.sync.get('last_active_tab', function(habit_streaks)
+    chrome.storage.local.get('last_active_tab', function(habit_streaks)
     {
         if (habit_streaks.last_active_tab != "about")
         {
@@ -38,7 +38,7 @@ document.getElementById("about").onclick = function() //If the ABOUT button is c
 
             document.getElementById(habit_streaks.last_active_tab+"_div").style.display = "none";
 
-            chrome.storage.sync.set({'last_active_tab': 'about'})
+            chrome.storage.local.set({'last_active_tab': 'about'})
 
             document.getElementById("about_div").style.display = "block";
 
@@ -50,7 +50,7 @@ document.getElementById("about").onclick = function() //If the ABOUT button is c
 }
 document.getElementById("good_habits").onclick = function() //If the GOOD HABITS button is clicked
 {
-    chrome.storage.sync.get('last_active_tab', function(habit_streaks)
+    chrome.storage.local.get('last_active_tab', function(habit_streaks)
     {
         if (habit_streaks.last_active_tab != "good_habits")
         {
@@ -60,7 +60,7 @@ document.getElementById("good_habits").onclick = function() //If the GOOD HABITS
 
             document.getElementById(habit_streaks.last_active_tab+"_div").style.display = "none";
 
-            chrome.storage.sync.set({'last_active_tab': 'good_habits'})
+            chrome.storage.local.set({'last_active_tab': 'good_habits'})
 
             document.getElementById("good_habits_div").style.display = "block";
 
@@ -75,7 +75,7 @@ document.getElementById("good_habits").onclick = function() //If the GOOD HABITS
 }
 document.getElementById("bad_habits").onclick = function() //If the BAD HABITS button is clicked
 {
-    chrome.storage.sync.get('last_active_tab', function(habit_streaks)
+    chrome.storage.local.get('last_active_tab', function(habit_streaks)
     {
         if (habit_streaks.last_active_tab != "bad_habits")
         {
@@ -85,7 +85,7 @@ document.getElementById("bad_habits").onclick = function() //If the BAD HABITS b
 
             document.getElementById(habit_streaks.last_active_tab+"_div").style.display = "none";
 
-            chrome.storage.sync.set({'last_active_tab': 'bad_habits'})
+            chrome.storage.local.set({'last_active_tab': 'bad_habits'})
 
             document.getElementById("bad_habits_div").style.display = "block";
 
@@ -97,7 +97,7 @@ document.getElementById("bad_habits").onclick = function() //If the BAD HABITS b
 }
 document.getElementById("settings").onclick = function() //If the SETTINGS button is clicked
 {
-    chrome.storage.sync.get('last_active_tab', function(habit_streaks)
+    chrome.storage.local.get('last_active_tab', function(habit_streaks)
     {
         if (habit_streaks.last_active_tab != "settings")
         {
@@ -107,7 +107,7 @@ document.getElementById("settings").onclick = function() //If the SETTINGS butto
 
             document.getElementById(habit_streaks.last_active_tab+"_div").style.display = "none";
 
-            chrome.storage.sync.set({'last_active_tab': 'settings'})
+            chrome.storage.local.set({'last_active_tab': 'settings'})
 
             document.getElementById("settings_div").style.display = "block";
 
@@ -153,7 +153,7 @@ and it would be laggy
 //When the user selects a new option from the "Sort habits by" dropdown, change it in chrome storage
 document.getElementById("good_habits_sort_select").onchange = function()
 {
-    chrome.storage.sync.set({"good_habits_sort": document.getElementById("good_habits_sort_select").value});
+    chrome.storage.local.set({"good_habits_sort": document.getElementById("good_habits_sort_select").value});
     let sscrollY = document.documentElement.scrollTop;
     good_habits_tab();
     setTimeout(function(){document.documentElement.scrollTop = sscrollY}, 1);
@@ -161,7 +161,7 @@ document.getElementById("good_habits_sort_select").onchange = function()
 
 function habit_completed(ID)
 {
-    chrome.storage.sync.get('good_habits', function(habit_streaks)
+    chrome.storage.local.get('good_habits', function(habit_streaks)
     {   
         //Makes things easier to work with
         let hab = habit_streaks.good_habits;
@@ -171,7 +171,7 @@ function habit_completed(ID)
         gh.done_today = true;
         gh.completions.push({"date": [new Date().toString().substr(4, 11)+" 00:00", new Date().toString().substr(4, 11)+" 23:59"], "completed": true})
         hab[ID] = gh;
-        chrome.storage.sync.set({"good_habits": hab});
+        chrome.storage.local.set({"good_habits": hab});
 
         //Updates all the other habit stats like best streak, average streak etc.
         update_good_habit_stats(ID);
@@ -195,10 +195,10 @@ function good_habits_tab()
     //Sorts everything before starting
     sort_good_habits_difficulty();
 
-    chrome.storage.sync.get(['good_habits', 'good_habits_sort'], function(habit_streaks)
+    chrome.storage.local.get(['good_habits', 'good_habits_sort'], function(habit_streaks)
     {
         //Sets the "Sort habits by" dropdown to the correct thing. If it's your first time, set's it to default
-        if (habit_streaks.good_habits_sort == undefined) chrome.storage.sync.set({"good_habits_sort": "N-O"})
+        if (habit_streaks.good_habits_sort == undefined) chrome.storage.local.set({"good_habits_sort": "N-O"})
         else document.getElementById("good_habits_sort_select").value = habit_streaks.good_habits_sort;
         
         //So that if you delete your 1 habit it will still show the text
@@ -350,7 +350,7 @@ function good_habit_settings(id)
     //Records the pos of scroll bar
     good_habits_scroll = document.documentElement.scrollTop;
 
-    chrome.storage.sync.get('good_habits', function(habit_streaks)
+    chrome.storage.local.get('good_habits', function(habit_streaks)
     {
         //Clear screen/setup
         good_clear("good_habits_settings");
@@ -494,7 +494,7 @@ function good_habit_settings(id)
                 //Deletes the habit
                 let x = habit_streaks.good_habits;
                 x.splice(id, id+1)
-                chrome.storage.sync.set({"good_habits": x});
+                chrome.storage.local.set({"good_habits": x});
 
                 //Refreshes the page
                 document.getElementById("tabs").style.display = "block";
@@ -538,7 +538,7 @@ function update_good_habits_time() //NOT TESTED
         change the completion date to +1 day
     */
 
-    chrome.storage.sync.get(["good_habits", "late"], function(habit_streaks)
+    chrome.storage.local.get(["good_habits", "late"], function(habit_streaks)
     {
         //Easier to update chrome storage
         let habits = habit_streaks.good_habits;
@@ -571,7 +571,7 @@ function update_good_habits_time() //NOT TESTED
 
                 //Updates data
                 habits[i] = habit;
-                chrome.storage.sync.set({"late": late, "good_habits": habits})
+                chrome.storage.local.set({"late": late, "good_habits": habits})
             }
         }
     })
@@ -619,7 +619,7 @@ function date_greater_than (date1, date2)
 var good_habits_difficulty_sort = [];
 function sort_good_habits_difficulty()
 {
-    chrome.storage.sync.get("good_habits", function(habit_streaks)
+    chrome.storage.local.get("good_habits", function(habit_streaks)
     {
         //Makes an easier way to work with the difficulty of each habit
         let entries = []
@@ -691,7 +691,7 @@ function sort_good_habits_difficulty()
 
 function update_good_habit_stats(ID)
 {
-    chrome.storage.sync.get("good_habits", function(habit_streaks)
+    chrome.storage.local.get("good_habits", function(habit_streaks)
     {
         //Setup
         let times_completed = 0;
@@ -734,7 +734,7 @@ function update_good_habit_stats(ID)
         gh.best_streak = best_streak;
         gh.current_streak = streaks[streaks.length-1]
         all[ID] = gh;
-        chrome.storage.sync.set({"good_habits": all});
+        chrome.storage.local.set({"good_habits": all});
     })
 }
 
@@ -752,11 +752,11 @@ function good_clear(ID) //Clears the page for a new popup
 }
 
 //Makes things not undefined at the start
-chrome.storage.sync.get(['good_habits', 'late', 'task_list_sort'], function(habit_streaks)
+chrome.storage.local.get(['good_habits', 'late', 'task_list_sort'], function(habit_streaks)
 {
-    if (habit_streaks.good_habits == undefined) chrome.storage.sync.set({"good_habits": []})
-    if (habit_streaks.late == undefined) chrome.storage.sync.set({"late": []})
-    if (habit_streaks.task_list_sort == undefined) chrome.storage.sync.set({"task_list_sort": "urgency"})
+    if (habit_streaks.good_habits == undefined) chrome.storage.local.set({"good_habits": []})
+    if (habit_streaks.late == undefined) chrome.storage.local.set({"late": []})
+    if (habit_streaks.task_list_sort == undefined) chrome.storage.local.set({"task_list_sort": "urgency"})
 })
 }
 
@@ -791,7 +791,7 @@ function task_list()
     document.getElementById("task_list_cancel").onclick = function(){task_list_clear()}
 
     //Displays habits
-    chrome.storage.sync.get(["task_list_sort", "good_habits"], function(habit_streaks)
+    chrome.storage.local.get(["task_list_sort", "good_habits"], function(habit_streaks)
     {
         //less typing
         let local_sort;
@@ -837,7 +837,7 @@ function task_list()
 
     document.getElementById("task_list_sort_select").onchange = function()
     {
-        chrome.storage.sync.set({"task_list_sort": document.getElementById("task_list_sort_select").value})
+        chrome.storage.local.set({"task_list_sort": document.getElementById("task_list_sort_select").value})
         task_list_clear();
         task_list();
     }
@@ -950,7 +950,7 @@ function good_habit_submit(extra, id)
     //If you submit correctly
     if (name.value.length != 0 && description.value.length != 0)
     {
-        chrome.storage.sync.get('good_habits', function(habit_streaks)
+        chrome.storage.local.get('good_habits', function(habit_streaks)
         {
             if (extra == "") //New Habit page
             {
@@ -972,12 +972,12 @@ function good_habit_submit(extra, id)
                 {
                     let x = habit_streaks.good_habits;
                     x.push(temp)
-                    chrome.storage.sync.set({"good_habits": x})
+                    chrome.storage.local.set({"good_habits": x})
                 }
                 //first time, sets it to an array
                 else
                 {
-                    chrome.storage.sync.set({"good_habits": [temp]})
+                    chrome.storage.local.set({"good_habits": [temp]})
                 }
                 
                 document.getElementById("no_good_habits").style.display = "none";
@@ -995,7 +995,7 @@ function good_habit_submit(extra, id)
                 let x = habit_streaks.good_habits;
                 x[id].name = name.value;
                 x[id].description = description.value;
-                chrome.storage.sync.set({"good_habits": x})
+                chrome.storage.local.set({"good_habits": x})
 
                 document.getElementById("tabs").style.display = "block";
                 document.getElementById("good_habits_div").style.display = "block";

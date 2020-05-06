@@ -16,7 +16,8 @@
     [
         "background",
         "storage",
-        "notifications"
+        "notifications",
+        "unlimitedStorage"
     ],
     "background":
     {
