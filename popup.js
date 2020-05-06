@@ -430,14 +430,51 @@ function good_habit_settings(id)
                     document.getElementById("good_habits_settings").style.display = "block";
                 }
                 
-                
+                //Deletes the "no completion history" text if it isnt true
+                if (habit_streaks.good_habits[id].completions.length > 0) document.getElementById("completion_history_empty").style.display = "none";
+                else document.getElementById("completion_history_empty").style.display = "block";
 
                 //Displays the entries
-                for (let i = habit_streaks.good_habits.length; i > 0; i--)
+                for (let i = habit_streaks.good_habits[id].completions.length; i > 0; i--)
                 {
+                    //easier for typing (cc means current_completion)
+                    let cc = habit_streaks.good_habits[id].completions[i-1];
+
+                    //Creates the div
                     let entry = document.createElement('div');
-                    entry.style = "height: 50px; background-color: gray;"
+                    //entry.style = " background-color: #f5f5f5;"
                     entry.className = "entry";
+                    if (i == 1) entry.style.marginBottom = "5px";
+
+                    //date text
+                    let dates = document.createElement("p");
+                    dates.style = "margin-top: 5px; margin-bottom: 5px; font-size: 14px;"
+                    dates.innerHTML = cc.date[0] + "     to     " + cc.date[1];
+                    if (cc.completed) dates.style.color = "green";
+                    else dates.style.color = "red";
+
+                    //complete/incomplete dropdown
+                    let dropdown = document.createElement('select');
+                    let complete = document.createElement('option');
+                    complete.innerHTML = "Complete"
+                    complete.value = "true"
+                    complete.style.color = "green";
+                    let incomplete = document.createElement("option")
+                    incomplete.innerHTML = "Incomplete"
+                    incomplete.value = "false";
+                    incomplete.style.color = "red";
+                    dropdown.appendChild(complete)
+                    dropdown.appendChild(incomplete)
+                    dropdown.value = cc.completed.toString();
+                    dropdown.onchange = function()
+                    {
+                        alert();
+                    }
+
+
+                    //Appends elements to div
+                    entry.appendChild(dates);
+                    entry.appendChild(dropdown);
 
                     document.getElementById("completion_history_entries").appendChild(entry);
                     if (i > 1) document.getElementById("completion_history_entries").appendChild(document.createElement("hr"));
